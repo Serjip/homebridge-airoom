@@ -37,7 +37,6 @@ function Airoom(log, config) {
         this.endpoint = "http://88.198.184.76/api/devices";
     }
 
-
     this.deviceId = config["deviceId"];
     if (!this.deviceId) {
         throw new Error("Missed param deviceId");
@@ -83,7 +82,7 @@ Airoom.prototype.UpdateStates = function () {
             var temp = json.state.payload.temperature;
             var humidity = json.state.payload.humidity;
             var pressure = json.state.payload.pressure;
-            var co2 = json.state.payload.ppm;
+            var co2 = json.state.payload.co2;
 
             // Set current states
             this.service.setCharacteristic(Characteristic.CurrentTemperature, temp);
