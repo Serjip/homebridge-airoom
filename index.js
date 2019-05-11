@@ -42,15 +42,18 @@ function Airoom(log, config) {
         throw new Error("Missed param deviceId");
     }
 
-    var self = this;
-    var info = new Service.AccessoryInformation();
+    // Declare services
+    this.services = [];
 
+    // Get Accessory Information
+    var self = this;
     this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
         if (err == null) {
+            var info = new Service.AccessoryInformation();
             info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
             info.setCharacteristic(Characteristic.Model, "1.0");
             info.setCharacteristic(Characteristic.SerialNumber, mac);
-            self.info = info;
+            self.services.push(info);
         }
     });
 
@@ -59,6 +62,8 @@ function Airoom(log, config) {
     this.service.addCharacteristic(Characteristic.CurrentRelativeHumidity);
     this.service.addCharacteristic(Characteristic.CarbonDioxideLevel);
     this.service.addCharacteristic(Characteristic.AirPressure);
+
+    this.services.push(this.service);
 
     // Update states first time
     this.UpdateStates;
@@ -123,5 +128,5 @@ Airoom.prototype.getInfo = function (callback) {
 };
 
 Airoom.prototype.getServices = function () {
-    return [this.info, this.service];
+    return this.services;
 };
