@@ -45,13 +45,14 @@ function Airoom(log, config) {
     // Declare services
     this.services = [];
 
+    var mac = this.getSerialNumber();
+
     // Get Accessory Information
     this.info = new Service.AccessoryInformation();
-    this.info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
     this.info.setCharacteristic(Characteristic.Model, "1.0");
-    this.info
-        .getCharacteristic(Characteristic.SerialNumber)
-        .on('get', this.getSerialNumber.bind(this));
+    this.info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
+    this.info.setCharacteristic(Characteristic.FirmwareRevision, "1.0");
+    this.info.setCharacteristic(Characteristic.SerialNumber, mac);
     this.services.push(this.info);
 
     // Create services
@@ -59,7 +60,6 @@ function Airoom(log, config) {
     this.sensor.addCharacteristic(Characteristic.CurrentRelativeHumidity);
     this.sensor.addCharacteristic(Characteristic.CarbonDioxideLevel);
     this.sensor.addCharacteristic(Characteristic.AirPressure);
-
     this.services.push(this.sensor);
 
     // Update states first time
@@ -94,13 +94,27 @@ Airoom.prototype.UpdateStates = function () {
 
 };
 
-Airoom.prototype.getSerialNumber = function(callback) {
+Airoom.prototype.getSerialNumber = function () {
+    var req = require('sync-request');
+    var url = this.endpoint + "/" + this.deviceId;
+    var res = req('GET', url);
 
-    this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
+    if (res.statusCode >= 300) {
+        var err = new Error(
+            'Server responded with status code ' +
+            res.statusCode +
+            ':\n' +
+            res.body.toString(encoding)
+        );
+        err.statusCode = res.statusCode;
+        err.headers = res.headers;
+        err.body = res.body;
+        throw err;
+    }
 
-        callback(err, mac);
-
-    });
+    var json = JSON.parse(res.body.toString('utf-8'));
+    var mac = json.mac;
+    return mac
 };
 
 Airoom.prototype.getInfo = function (callback) {
