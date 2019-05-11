@@ -34,7 +34,7 @@ function Airoom(log, config) {
 
     this.endpoint = config["endpoint"];
     if (!this.endpoint) {
-        this.endpoint = "http://88.198.184.76/api/devices";
+        this.endpoint = "https://airoom.cloud/api/devices";
     }
 
     this.deviceId = config["deviceId"];
@@ -42,10 +42,17 @@ function Airoom(log, config) {
         throw new Error("Missed param deviceId");
     }
 
-    this.info = new Service.AccessoryInformation();
-    this.info
-        .setCharacteristic(Characteristic.Manufacturer, "Airoom")
-        .setCharacteristic(Characteristic.Model, "1.0");
+    var self = this;
+    var info = new Service.AccessoryInformation();
+
+    this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
+        if (err == null) {
+            info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
+            info.setCharacteristic(Characteristic.Model, "1.0");
+            info.setCharacteristic(Characteristic.SerialNumber, mac);
+            self.info = info;
+        }
+    });
 
     // Create services
     this.service = new Service.TemperatureSensor(this.name);
@@ -65,37 +72,51 @@ function Airoom(log, config) {
 
 
 Airoom.prototype.UpdateStates = function () {
-    this.log("Getting states...");
+
+    var self = this;
+
+    this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
+
+        if (err == null) {
+            // Set current states
+            self.service.setCharacteristic(Characteristic.CurrentTemperature, temp);
+            self.service.setCharacteristic(Characteristic.CurrentRelativeHumidity, humidity);
+            self.service.setCharacteristic(Characteristic.CarbonDioxideLevel, co2);
+            self.service.setCharacteristic(Characteristic.AirPressure, pressure);
+        }
+        else {
+            throw err;
+        }
+
+    });
+
+};
+
+Airoom.prototype.getInfo = function (callback) {
 
     request.get({
-        url: this.endpoint + "/" + this.deviceId
+
+        url: this.endpoint + "/" + this.deviceId,
+
     }, function (err, response, body) {
 
         if (!err && response.statusCode === 200) {
-
-            // Log body
-            this.log("State is %s", body);
 
             var json = JSON.parse(body);
 
             // Set states
             var temp = json.state.payload.temperature;
             var humidity = json.state.payload.humidity;
-            var pressure = json.state.payload.pressure;
+            var pressure = json.state.payload.pressure * 0.00750062;
             var co2 = json.state.payload.co2;
+            var mac = json.mac;
 
-            // Set current states
-            this.service.setCharacteristic(Characteristic.CurrentTemperature, temp);
-            this.service.setCharacteristic(Characteristic.CurrentRelativeHumidity, humidity);
-            this.service.setCharacteristic(Characteristic.CarbonDioxideLevel, co2);
-            this.service.setCharacteristic(Characteristic.AirPressure, pressure * 0.00750062);
-
-            // Accessory Information
-            this.info.setCharacteristic(Characteristic.SerialNumber, json.mac);
+            callback(null, temp, humidity, pressure, co2, mac);
         }
         else {
 
             this.log("Error '%s' getting state. Response: %s", err, body);
+            callback(err);
         }
 
     }.bind(this));
