@@ -46,16 +46,13 @@ function Airoom(log, config) {
     this.services = [];
 
     // Get Accessory Information
-    var self = this;
-    this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
-        if (err == null) {
-            var info = new Service.AccessoryInformation();
-            info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
-            info.setCharacteristic(Characteristic.Model, "1.0");
-            info.setCharacteristic(Characteristic.SerialNumber, mac);
-            self.services.push(info);
-        }
-    });
+    this.info = new Service.AccessoryInformation();
+    this.info.setCharacteristic(Characteristic.Manufacturer, "Airoom");
+    this.info.setCharacteristic(Characteristic.Model, "1.0");
+    this.info
+        .getCharacteristic(Characteristic.SerialNumber)
+        .on('get', this.getSerialNumber.bind(this));
+    this.services.push(info);
 
     // Create services
     this.sensor = new Service.TemperatureSensor(this.name);
@@ -95,6 +92,15 @@ Airoom.prototype.UpdateStates = function () {
 
     });
 
+};
+
+Airoom.prototype.getSerialNumber = function(callback) {
+
+    this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
+
+        callback(err, mac);
+
+    });
 };
 
 Airoom.prototype.getInfo = function (callback) {
