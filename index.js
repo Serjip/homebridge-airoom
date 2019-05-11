@@ -47,6 +47,7 @@ function Airoom(log, config) {
 
     // Get Accessory Information
     var self = this;
+    var sem = 0;
     this.getInfo(function (err, temp, humidity, pressure, co2, mac) {
         if (err == null) {
             var info = new Service.AccessoryInformation();
@@ -55,7 +56,12 @@ function Airoom(log, config) {
             info.setCharacteristic(Characteristic.SerialNumber, mac);
             self.services.push(info);
         }
+        sem = 1;
     });
+
+    while (sem != 1) {
+
+    }
 
     // Create services
     this.service = new Service.TemperatureSensor(this.name);
