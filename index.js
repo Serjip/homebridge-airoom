@@ -58,12 +58,12 @@ function Airoom(log, config) {
     });
 
     // Create services
-    this.service = new Service.TemperatureSensor(this.name);
-    this.service.addCharacteristic(Characteristic.CurrentRelativeHumidity);
-    this.service.addCharacteristic(Characteristic.CarbonDioxideLevel);
-    this.service.addCharacteristic(Characteristic.AirPressure);
+    this.sensor = new Service.TemperatureSensor(this.name);
+    this.sensor.addCharacteristic(Characteristic.CurrentRelativeHumidity);
+    this.sensor.addCharacteristic(Characteristic.CarbonDioxideLevel);
+    this.sensor.addCharacteristic(Characteristic.AirPressure);
 
-    this.services.push(this.service);
+    this.services.push(this.sensor);
 
     // Update states first time
     this.UpdateStates;
@@ -84,10 +84,10 @@ Airoom.prototype.UpdateStates = function () {
 
         if (err == null) {
             // Set current states
-            self.service.setCharacteristic(Characteristic.CurrentTemperature, temp);
-            self.service.setCharacteristic(Characteristic.CurrentRelativeHumidity, humidity);
-            self.service.setCharacteristic(Characteristic.CarbonDioxideLevel, co2);
-            self.service.setCharacteristic(Characteristic.AirPressure, pressure);
+            self.sensor.setCharacteristic(Characteristic.CurrentTemperature, temp);
+            self.sensor.setCharacteristic(Characteristic.CurrentRelativeHumidity, humidity);
+            self.sensor.setCharacteristic(Characteristic.CarbonDioxideLevel, co2);
+            self.sensor.setCharacteristic(Characteristic.AirPressure, pressure);
         }
         else {
             throw err;
