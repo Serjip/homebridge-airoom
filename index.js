@@ -52,7 +52,7 @@ function Airoom(log, config) {
     this.info
         .getCharacteristic(Characteristic.SerialNumber)
         .on('get', this.getSerialNumber.bind(this));
-    this.services.push(info);
+    this.services.push(this.info);
 
     // Create services
     this.sensor = new Service.TemperatureSensor(this.name);
