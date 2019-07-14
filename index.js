@@ -97,7 +97,10 @@ Airoom.prototype.UpdateStates = function () {
 Airoom.prototype.getSerialNumber = function () {
     var req = require('sync-request');
     var url = this.endpoint + "/" + this.deviceId;
-    var res = req('GET', url);
+    var res = req('GET', url, {
+        timeout: 2000,
+        socketTimeout: 2000,
+    });
 
     if (res.statusCode >= 300) {
         var err = new Error(
