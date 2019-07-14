@@ -45,7 +45,12 @@ function Airoom(log, config) {
     // Declare services
     this.services = [];
 
-    var mac = this.getSerialNumber();
+    // Get the mac address
+    try {
+        var mac = this.getSerialNumber();
+    } catch (e) {
+        mac = "Unknown";
+    }
 
     // Get Accessory Information
     this.info = new Service.AccessoryInformation();
