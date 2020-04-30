@@ -1,6 +1,6 @@
 {
   "name": "homebridge-airoom",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CO2, and weather station",
   "license": "ISC",
   "keywords": [
