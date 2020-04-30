@@ -68,12 +68,22 @@ function Airoom(log, config) {
     this.services.push(this.sensor);
 
     // Update states first time
-    this.UpdateStates;
+    try {
+        this.UpdateStates;
+    } catch (e) {
+        this.log("Error '%s' getting state.", e);
+    }
 
     // Set interval
     var self = this;
     setInterval(function () {
-        self.UpdateStates();
+
+        try {
+            self.UpdateStates();
+        } catch (e) {
+            self.log("Error '%s' getting state.", e);
+        }
+
     }, 10000);
 }
 
@@ -90,8 +100,7 @@ Airoom.prototype.UpdateStates = function () {
             self.sensor.setCharacteristic(Characteristic.CurrentRelativeHumidity, humidity);
             self.sensor.setCharacteristic(Characteristic.CarbonDioxideLevel, co2);
             self.sensor.setCharacteristic(Characteristic.AirPressure, pressure);
-        }
-        else {
+        } else {
             throw err;
         }
 
@@ -145,10 +154,7 @@ Airoom.prototype.getInfo = function (callback) {
             var mac = json.mac;
 
             callback(null, temp, humidity, pressure, co2, mac);
-        }
-        else {
-
-            this.log("Error '%s' getting state. Response: %s", err, body);
+        } else {
             callback(err);
         }
 
